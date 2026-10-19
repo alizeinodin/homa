@@ -37,7 +37,8 @@ class HandleInertiaRequests extends Middleware
             ],
             'ziggy' => fn () => [
                 ...(new Ziggy)->toArray(),
-                'location' => $request->url(),
+                // Prefer APP_URL (includes /twitter) over the stripped proxy request URL
+                'location' => rtrim((string) config('app.url'), '/') . $request->getRequestUri(),
             ],
         ];
     }

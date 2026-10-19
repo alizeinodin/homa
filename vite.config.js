@@ -3,6 +3,8 @@ import laravel from 'laravel-vite-plugin';
 import vue from '@vitejs/plugin-vue';
 
 export default defineConfig({
+    // Cafejoon subdirectory + nginx strip: browser paths must be /twitter/build/...
+    base: process.env.VITE_BASE || '/',
     plugins: [
         laravel({
             input: 'resources/js/app.js',

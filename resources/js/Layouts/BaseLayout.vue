@@ -7,7 +7,7 @@ import Feather from 'vue-material-design-icons/Feather.vue'
 import MenuItem from '@/Components/MenuItem.vue'
 import CreateTweet from "@/Components/Tweet/CreateTweet.vue";
 
-const randImg2 = ref(`https://picsum.photos/id/${(Math.random() * 200).toFixed(0)}/100`)
+const randImg2 = ref('https://picsum.photos/seed/homa/100')
 const createTweet = ref(false)
 
 </script>
@@ -114,10 +114,14 @@ const createTweet = ref(false)
                             <DotsHorizontal fill-color="#5e5c5c"/>
                         </div>
                     </div>
-                    <CreateTweet :on-close="createTweet = false" :create-tweet="createTweet" />
                 </div>
             </div>
         </div>
+
+        <CreateTweet
+            :create-tweet="createTweet"
+            @on-close="createTweet = false"
+        />
     </div>
 </template>
 

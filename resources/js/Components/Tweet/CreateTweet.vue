@@ -45,7 +45,7 @@ const addTweet = () => {
     data.append('tweet', tweet.value)
     data.append('file', file.value)
 
-    router.post('/tweets', data)
+    router.post(route('tweets.store'), data)
 
     closeMessageBox()
 }

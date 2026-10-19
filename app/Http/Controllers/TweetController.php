@@ -8,98 +8,62 @@ use Inertia\Inertia;
 
 class TweetController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         return Inertia::render('Welcome', [
-            'tweets' => Tweet::orderBy('id', 'desc')->get()
+            'tweets' => Tweet::orderByDesc('id')->get(),
         ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        $file = null;
-        $extension = null;
-        $fileName = null;
+        $request->validate([
+            'tweet' => 'required|string|max:500',
+            'file' => 'nullable|mimes:jpg,jpeg,png,mp4|max:10240',
+        ]);
+
         $path = '';
+        $fileName = null;
+        $extension = null;
 
         if ($request->hasFile('file')) {
             $file = $request->file('file');
-            $request->validate([ 'file' => 'required|mimes:jpg,jpeg,png,mp4' ]);
             $extension = $file->getClientOriginalExtension();
-            $fileName = time() . '.' . $extension;
-            $extension === 'mp4' ? $path = '/videos/' : $path = '/pics/';
+            $fileName = time().'.'.$extension;
+            $path = $extension === 'mp4' ? '/videos/' : '/pics/';
+
+            $dir = public_path($path);
+            if (! is_dir($dir)) {
+                mkdir($dir, 0755, true);
+            }
+
+            $file->move($dir, $fileName);
         }
 
-        $tweet = new Tweet;
+        Tweet::create([
+            'name' => 'Demo User',
+            'handle' => '@demouser',
+            'image' => 'https://randomuser.me/api/portraits/men/32.jpg',
+            'tweet' => $request->input('tweet'),
+            'file' => $fileName ? $path.$fileName : null,
+            'is_video' => $extension === 'mp4',
+            'comments' => random_int(5, 500),
+            'retweets' => random_int(5, 500),
+            'likes' => random_int(5, 500),
+            'analytics' => random_int(5, 500),
+        ]);
 
-        $tweet->name = 'John Weeks Dev';
-        $tweet->handle = '@johnweeksdev';
-        $tweet->image = 'https://yt3.ggpht.com/e9o-24_frmNSSVvjS47rT8qCHgsHNiedqgXbzmrmpsj6H1ketcufR1B9vLXTZRa30krRksPj=s88-c-k-c0x00ffffff-no-rj-mo';
-        $tweet->tweet = $request->input('tweet');
-        if ($fileName) {
-            $tweet->file = $path . $fileName;
-            $tweet->is_video = $extension === 'mp4' ? true : false;
-            $file->move(public_path() . $path, $fileName);
-        }
-        $tweet->comments = rand(5, 500);
-        $tweet->retweets = rand(5, 500);
-        $tweet->likes = rand(5, 500);
-        $tweet->analytics = rand(5, 500);
-
-        $tweet->save();
+        return redirect()->route('dashboard');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Tweet $tweet)
+    public function destroy(Tweet $tweet)
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Tweet $tweet)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Tweet $tweet)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($id)
-    {
-        $tweet = Tweet::find($id);
-
-        if (!is_null($tweet->file) && file_exists(public_path() . $tweet->file)) {
-            unlink(public_path() . $tweet->file);
+        if ($tweet->file && file_exists(public_path($tweet->file))) {
+            unlink(public_path($tweet->file));
         }
 
         $tweet->delete();
 
-        return redirect()->route('tweets.index');
+        return redirect()->route('dashboard');
     }
 }
