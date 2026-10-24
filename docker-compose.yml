@@ -4,7 +4,8 @@
 
 services:
   homa.app:
-    image: sail-8.3/app-prod
+    # Built by cafejoon backend deploy (CVE-2026-109618/109619 floor: 8.3.36+)
+    image: sail-8.3.36/app-prod
     container_name: homa_app
     extra_hosts:
       - 'host.docker.internal:host-gateway'
